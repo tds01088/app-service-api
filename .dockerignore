@@ -1,0 +1,6 @@
+npm-debug.log
+.git
+.idea
+**/node_modules
+Jenkinsfile
+Dockerfile
