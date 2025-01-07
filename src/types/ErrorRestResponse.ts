@@ -1,5 +1,5 @@
-import { IsEnum, IsString } from 'class-validator';
-import { ErrorType } from './ErrorType';
+import { IsEnum, IsString } from "class-validator";
+import { ErrorType } from "./ErrorType";
 
 export class ErrorRestResponse {
   @IsString()
@@ -8,4 +8,3 @@ export class ErrorRestResponse {
   @IsEnum(ErrorType)
   type: ErrorType;
 }
-

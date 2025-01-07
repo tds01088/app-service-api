@@ -1,27 +1,98 @@
-import { Get, JsonController } from "routing-controllers";
-import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
-import { singleton } from 'tsyringe';
+import { Get, JsonController, UseBefore } from "routing-controllers";
+import { OpenAPI, ResponseSchema } from "routing-controllers-openapi";
+import { singleton } from "tsyringe";
+import { ErrorRestResponse } from "../types/ErrorRestResponse";
+import { trace } from "@opentelemetry/api";
+import { LoggingMiddleware } from "../middlewares/LoggingMiddleware";
+import Logger from "../utils/Logs";
+import { Product } from "../entities/ProductInfo";
+import { ProductService } from "../services/ProductService";
+import { ProductRepositoryImpl } from "../repositories/ProductInfo/ProductRepositoryImpl";
+
+//import swaggerDocument from './swagger.json';
+const logger = new Logger("HealthController.ts");
+
+/** constants */
+const success = "Operation successful";
+const healthEndPoint = "/health";
+
 @JsonController()
-@OpenAPI({ security: [{ bearerAuth: [] }] })
+@ResponseSchema(ErrorRestResponse, {
+  statusCode: 400,
+  description: "Bad request error",
+})
+@ResponseSchema(ErrorRestResponse, {
+  statusCode: 401,
+  description: "Authorization error",
+})
+@ResponseSchema(ErrorRestResponse, {
+  statusCode: 500,
+  description: "Internal error",
+})
+@OpenAPI({
+  security: [{ BearerAuth: [] }],
+  tags: ["Health"],
+})
 @singleton()
+@UseBefore(LoggingMiddleware) // Apply middleware only for this controller
 export default class HealthController {
+  constructor(private productService: ProductService) {
+    this.productService = new ProductService(new ProductRepositoryImpl());
+  }
   @OpenAPI({
     responses: {
-      '200': {
-        description: 'Health check status',
+      "200": {
+        description: "Health check status",
         content: {
-          'application/json': {
+          "application/json": {
             schema: {
-              type: 'array',
-              items: { type: 'string' } // Directly specifying `type: 'string'`
-            }
-          }
-        }
-      }
-    }
+              type: "array",
+              items: { type: "string" }, // Directly specifying `type: 'string'`
+            },
+          },
+        },
+      },
+    },
   })
-  @Get('/health')
+  @ResponseSchema(String, {
+    isArray: true,
+    statusCode: 200,
+    description: success,
+  })
+  @Get(healthEndPoint)
   async health(): Promise<string> {
-    return 'Server is up & running';
+    // Create a tracer and start a new span
+    const tracer = trace.getTracer("health-controller-tracer");
+    const span = tracer.startSpan("health-check");
+
+    // Add attributes to the span
+    span.setAttribute("route", healthEndPoint);
+    span.setAttribute("operation", "GET");
+
+    logger.info(
+      "[INFO] Log at the start of the method(`operation:Get /healthcheck`"
+    ); // Log at the start of the method(`operation:Get /healthcheck`);
+    span.end(); // End the span when the response is sent
+    return "Server is up & running for [backend-business-App-Service]";
+  }
+  @OpenAPI({
+    responses: {
+      "200": {
+        description: "get products",
+        content: {
+          "application/json": {
+            schema: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+  })
+  @Get("/products")
+  async products(): Promise<Product[]> {
+    const products = await this.productService.getAllProducts();
+    return products;
   }
 }

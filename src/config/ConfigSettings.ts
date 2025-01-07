@@ -1,18 +1,18 @@
 /* istanbul ignore next */
-if (!process.env.NODE_ENV || process.env.NODE_ENV === 'local') {
-  const dotenv = require('dotenv');
-  process.env.HTTP_PROXY = '';
-  process.env.HTTPS_PROXY = '';
+if (!process.env.NODE_ENV || process.env.NODE_ENV === "local") {
+  const dotenv = require("dotenv");
+  process.env.HTTP_PROXY = "";
+  process.env.HTTPS_PROXY = "";
   dotenv.load();
 }
-import axios from 'axios';
-import { Logger } from 'trace-logger';
+import axios from "axios";
+import { Logger } from "trace-logger";
 
-const logger = new Logger('ConfigSettings.ts');
+const logger = new Logger("ConfigSettings.ts");
 enum EnvVariables {
-  AXIOS_DEFAULT_TIMEOUT = 'AXIOS_DEFAULT_TIMEOUT',
-  CONNECTION_TIMEOUT = 'CONNECTION_TIMEOUT',
-  CONNECTION_STRING = 'CONNECTION_STRING'
+  AXIOS_DEFAULT_TIMEOUT = "AXIOS_DEFAULT_TIMEOUT",
+  CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT",
+  CONNECTION_STRING = "CONNECTION_STRING",
 }
 
 class ConfigSettings {
@@ -23,9 +23,7 @@ class ConfigSettings {
     }
     const result = ConfigSettings.configMap.get(name);
     if (!result) {
-      throw(
-        `Env variable ${name} is missing from the ConfigMap`
-      );
+      throw `Env variable ${name} is missing from the ConfigMap`;
     }
     return result;
   }
@@ -40,8 +38,6 @@ class ConfigSettings {
     }
   }
 
-
-
   /* istanbul ignore next */
   public static configAxios(): void {
     axios.defaults.timeout = parseInt(
@@ -52,7 +48,6 @@ class ConfigSettings {
   private static readonly configMap = new Map<string, string>();
   private static configLoaded = false;
 
-
   /* istanbul ignore next */
   private static getEnvVariable(name: string, showValueInLog = true): string {
     // check environment variable
@@ -61,15 +56,13 @@ class ConfigSettings {
     if (envVariable && envVariable.trim().length > 0) {
       logger.debug(
         `Using ${name} environment variable [${
-          showValueInLog ? envVariable : 'VALUE_HIDDEN'
+          showValueInLog ? envVariable : "VALUE_HIDDEN"
         }]`
       );
       return envVariable;
     }
 
-    throw(
-      `Env variable ${name} is missing from the ConfigMap`
-    );
+    throw `Env variable ${name} is missing from the ConfigMap`;
   }
 }
 

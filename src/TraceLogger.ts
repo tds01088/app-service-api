@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { context, propagation, trace } from '@opentelemetry/api';
+import { context, propagation, trace } from "@opentelemetry/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export class TraceLogger {
