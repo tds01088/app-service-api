@@ -6,9 +6,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === "local") {
   dotenv.load();
 }
 import axios from "axios";
-import { Logger } from "trace-logger";
-
-const logger = new Logger("ConfigSettings.ts");
+const logger = console; 
 enum EnvVariables {
   AXIOS_DEFAULT_TIMEOUT = "AXIOS_DEFAULT_TIMEOUT",
   CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT",
